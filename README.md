@@ -1,6 +1,8 @@
-# 🧭 Safari Window Switcher (v0.1.0)
+# 🧭 Safari Window Switcher (v0.2.0)
 
 > **Assign custom names to Safari windows, filter open windows instantly, and switch focus effortlessly.**
+
+💡 *Vibe-coded using Gemini 3.5 Flash (High) for testing & experimentation.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Safari WebExtension](https://img.shields.io/badge/Safari-WebExtension-000000.svg?logo=safari)](https://developer.apple.com/safari/extensions/)
@@ -58,6 +60,6 @@ This extension is 100% open source. You can build and install it locally on your
 
 ## 📄 License & Author
 
-- **Author**: Nick Lee <coolnickldd@gmail.com>
-- **Version**: 0.1.0
+- **Author**: bricolageTheory <bricolagetheory@gmail.com>
+- **Version**: 0.2.0
 - **License**: MIT
