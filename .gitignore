@@ -1,0 +1,23 @@
+# macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode & Build Artifacts
+build/
+dist/
+DerivedData/
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserdata
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Temporary / Scratch Files
+*.tmp
+*.log

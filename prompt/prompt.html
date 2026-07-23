@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Name Safari Window</title>
+  <link rel="stylesheet" href="prompt.css">
+</head>
+<body>
+  <div class="prompt-container">
+    <header class="header">
+      <div class="brand">
+        <span class="icon">🏷️</span>
+        <h1>Name New Safari Window</h1>
+      </div>
+    </header>
+
+    <main class="content">
+      <p class="instruction">Give this window a name or press <kbd>Enter</kbd> to save:</p>
+      
+      <div class="input-row">
+        <input 
+          type="text" 
+          id="windowNameInput" 
+          placeholder="e.g. Work Workspace, Personal, Research..." 
+          maxlength="50" 
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="actions">
+        <button id="skipBtn" class="btn btn-text">Skip</button>
+        <button id="applyBtn" class="btn btn-primary">Apply Name</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="prompt.js"></script>
+</body>
+</html>

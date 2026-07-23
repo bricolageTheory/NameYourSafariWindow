@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Options - Safari Window Switcher</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <header class="header">
+      <h1>Safari Window Switcher Settings</h1>
+      <p class="subtitle">Customize your window management preferences and keyboard shortcuts.</p>
+    </header>
+
+    <!-- General Settings Card -->
+    <section class="card">
+      <h2>General Options</h2>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <label for="enableTitleDecorator">Append Window Name to Active Tab Title</label>
+          <span class="setting-desc">When enabled, prepends <code>[Window Name]</code> to active tab titles so the window name shows in Safari's native title bar and tab bar.</span>
+        </div>
+        <div class="setting-control">
+          <input type="checkbox" id="enableTitleDecorator" class="toggle-checkbox">
+        </div>
+      </div>
+    </section>
+
+    <!-- Keyboard Shortcuts Guide Card -->
+    <section class="card">
+      <h2>Keyboard Shortcuts</h2>
+      <p class="section-desc">Default hotkey to open Window Switcher: <code>Control + Option + O</code> (^ ⌥ O)</p>
+      
+      <div class="shortcut-box">
+        <h3>How to Customize Keyboard Shortcuts in macOS:</h3>
+        <ol class="step-list">
+          <li>Open <strong>Safari</strong> on your Mac.</li>
+          <li>In the menu bar, go to <strong>Safari &gt; Settings...</strong> (or press <code>Cmd + ,</code>).</li>
+          <li>Click the <strong>Extensions</strong> tab and select <strong>Window Switcher</strong>.</li>
+          <li>Click <strong>Shortcuts...</strong> to assign your preferred key combination (e.g. <code>Control + Option + O</code> or <code>Option + Shift + W</code>).</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Privacy & Security Notice Card -->
+    <section class="card security-card">
+      <h2>Security & Privacy Guarantee</h2>
+      <ul>
+        <li>🛡️ <strong>100% Local Storage</strong>: All window labels are saved locally on your Mac using <code>browser.storage.local</code>.</li>
+        <li>🔒 <strong>Zero Network Tracking</strong>: This extension makes zero external HTTP/HTTPS requests.</li>
+        <li>⚡ <strong>Strict CSP Protection</strong>: Runs with strict Content Security Policy preventing remote script execution.</li>
+      </ul>
+    </section>
+
+    <!-- Status Message -->
+    <div id="statusToast" class="toast hidden">Settings saved!</div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
