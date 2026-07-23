@@ -2,7 +2,7 @@
 set -e
 
 APP_NAME="Safari Window Switcher"
-VERSION="0.1.0"
+VERSION="0.3.0"
 BUNDLE_ID="com.coolnick.SafariWindowSwitcher"
 EXTENSION_BUNDLE_ID="${BUNDLE_ID}.Extension"
 BUILD_DIR="$(pwd)/build/dist"
@@ -112,7 +112,7 @@ func NSExtensionMain(_ argc: Int32, _ argv: UnsafeMutablePointer<UnsafeMutablePo
 _ = NSExtensionMain(CommandLine.argc, CommandLine.unsafeArgv)' -o "${EXTENSION_BUNDLE}/Contents/MacOS/Safari Window Switcher Extension"
 
 # 5. Copy WebExtension resources
-cp -R manifest.json background popup options icons "${EXTENSION_BUNDLE}/Contents/Resources/"
+cp -R manifest.json background popup prompt options icons "${EXTENSION_BUNDLE}/Contents/Resources/"
 
 # 6. Check for Developer ID Certificate or fallback to ad-hoc
 SIGNING_IDENTITY=$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -n 1 | cut -d '"' -f 2 || true)
