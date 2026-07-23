@@ -327,14 +327,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (filtered.length === 0) {
-        // Outcome 1: 0 matching windows -> Do nothing
         return;
       } else if (filtered.length === 1) {
-        // Outcome 2: Exactly 1 matching window -> Focus immediately!
         switchWindow(filtered[0].id);
         return;
       } else {
-        // Outcome 3: Multiple (2+) matching windows -> Shift focus to list button #0
         updateSelection(0);
       }
     } else if (e.key === 'ArrowDown') {

@@ -2,6 +2,7 @@ const api = typeof browser !== 'undefined' ? browser : chrome;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const enableTitleDecorator = document.getElementById('enableTitleDecorator');
+  const resetAllNamesBtn = document.getElementById('resetAllNamesBtn');
   const statusToast = document.getElementById('statusToast');
 
   // Load saved options
@@ -32,4 +33,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Failed to save option:', e);
     }
   });
+
+  // Reset all names
+  if (resetAllNamesBtn) {
+    resetAllNamesBtn.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to clear all custom window names? This action cannot be undone.')) {
+        try {
+          await api.runtime.sendMessage({ type: 'CLEAR_ALL_NAMES' });
+          showToast('All custom window names cleared!');
+        } catch (e) {
+          console.error('Failed to reset names:', e);
+        }
+      }
+    });
+  }
 });

@@ -73,6 +73,10 @@ body {
   color: var(--accent-color);
 }
 
+.danger-card h2 {
+  color: #ef4444;
+}
+
 .setting-item {
   display: flex;
   align-items: center;
@@ -111,6 +115,23 @@ code {
   height: 20px;
   accent-color: var(--accent-color);
   cursor: pointer;
+}
+
+.danger-btn {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.danger-btn:hover {
+  background-color: #dc2626;
 }
 
 .step-list {

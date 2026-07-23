@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Safari Window Naming & Switcher",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Assign custom names to Safari windows, quickly filter, and switch between windows effortlessly.",
-  "author": "Nick Lee <coolnickldd@gmail.com>",
+  "author": "bricolageTheory <bricolagetheory@gmail.com>",
   "permissions": [
     "storage"
   ],

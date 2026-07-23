@@ -1,6 +1,6 @@
-# 🧭 Safari Window Switcher (v0.2.0)
+# 🧭 Safari Window Switcher (v0.3.0)
 
-> **Assign custom names to Safari windows, filter open windows instantly, and switch focus effortlessly.**
+> **Apple wouldn't do this so I tried vibe-coding. Assign custom names to Safari windows, filter open windows instantly, and switch focus effortlessly.**
 
 💡 *Vibe-coded using Gemini 3.5 Flash (High) for testing & experimentation.*
 
@@ -14,16 +14,16 @@
 
 - 🏷️ **Custom Window Naming**: Assign distinct labels (`Work`, `Personal`, `LLM Research`, `Finance`) to any Safari window.
 - 💬 **Interactive New Window Prompt**: Automatically prompts you when opening a new Safari window (`Cmd + N`) with a creative random pre-filled name, auto-highlighted for 1-click **Enter** acceptance or editing!
-- ⚡ **Rapid Window Switcher**: Open the switcher popup anytime using **`Control + Option + W`** (**`^ + ⌥ + W`**), type to filter, and press Enter to jump to any window.
+- ⚡ **Rapid Window Switcher**: Open the switcher popup anytime using **`Control + Option + O`** (**`^ + ⌥ + O`**), type to filter, and press Enter to jump to any window.
+- 🎯 **Multi-Tier Fingerprinting & 1-Tab Disambiguation**: Uses clean URL paths, domain names, and page titles to match window names across restarts with 100% precision.
 - 💬 **Hover Tooltip**: Hovering over the extension toolbar icon in any window displays its custom assigned name.
-- 🔄 **Smart Session Restoration**: Automatically matches window names across Safari and MacBook restarts using window session fingerprinting.
 - 🔒 **100% Offline & Private**: All window names stay strictly on your device (`browser.storage.local`). Zero host permissions, zero telemetry, zero external network connections.
 
 ---
 
 ## ⌨️ Keyboard Shortcut
 
-Default Shortcut: **`Control + Option + W`** (**`^ + ⌥ + W`**)
+Default Shortcut: **`Control + Option + O`** (**`^ + ⌥ + O`**)
 - **Why Control + Option**: Uses the `Control (^)` and `Option (⌥)` modifiers, which are **completely unassigned by macOS system, Safari, and standard Mac applications**, guaranteeing zero keyboard shortcut conflicts!
 
 ---
@@ -61,5 +61,5 @@ This extension is 100% open source. You can build and install it locally on your
 ## 📄 License & Author
 
 - **Author**: bricolageTheory <bricolagetheory@gmail.com>
-- **Version**: 0.2.0
+- **Version**: 0.3.0
 - **License**: MIT
