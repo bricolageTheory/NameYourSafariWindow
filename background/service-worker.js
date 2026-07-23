@@ -14,19 +14,62 @@ function getWindowFingerprint(win) {
   };
 }
 
+// Automatic Storage Deduplication Migration
+async function cleanAndDeduplicateStorage() {
+  try {
+    const { windowNames = {}, savedWindowRegistry = [] } = await api.storage.local.get(['windowNames', 'savedWindowRegistry']);
+    
+    // Deduplicate savedWindowRegistry by unique name
+    const uniqueRegistryMap = new Map();
+    for (const entry of savedWindowRegistry) {
+      if (entry && entry.name) {
+        const lower = entry.name.trim().toLowerCase();
+        if (!uniqueRegistryMap.has(lower)) {
+          uniqueRegistryMap.set(lower, entry);
+        }
+      }
+    }
+    const cleanedRegistry = Array.from(uniqueRegistryMap.values());
+
+    // Deduplicate active windowNames
+    const usedNamesLower = new Set();
+    const cleanedWindowNames = {};
+    for (const [winId, name] of Object.entries(windowNames)) {
+      if (name) {
+        const lower = name.trim().toLowerCase();
+        if (!usedNamesLower.has(lower)) {
+          usedNamesLower.add(lower);
+          cleanedWindowNames[winId] = name;
+        }
+      }
+    }
+
+    await api.storage.local.set({
+      windowNames: cleanedWindowNames,
+      savedWindowRegistry: cleanedRegistry
+    });
+  } catch (e) {
+    console.error('Error cleaning storage:', e);
+  }
+}
+
 // Global flag to prevent name overwrites during initial browser launch session restore
 let isRestoringSession = true;
 setTimeout(() => {
   isRestoringSession = false;
 }, 5000); // 5-second lock on startup
 
-// Initialize default storage
+// Initialize default storage & clean duplicates
 api.runtime.onInstalled.addListener(async () => {
   const data = await api.storage.local.get(['windowNames', 'savedWindowRegistry']);
   if (!data.windowNames) await api.storage.local.set({ windowNames: {} });
   if (!data.savedWindowRegistry) await api.storage.local.set({ savedWindowRegistry: [] });
+  await cleanAndDeduplicateStorage();
   await updateAllWindowTooltips();
 });
+
+// Run storage cleanup on service worker launch
+cleanAndDeduplicateStorage();
 
 // Sync active window sessions to persistent registry
 async function syncWindowRegistry() {
@@ -34,24 +77,27 @@ async function syncWindowRegistry() {
     const windows = await api.windows.getAll({ populate: true });
     const { windowNames = {} } = await api.storage.local.get('windowNames');
     
-    const updatedRegistry = [];
+    const updatedRegistryMap = new Map();
 
     for (const win of windows) {
       if (win.type === 'popup') continue;
       const name = windowNames[win.id];
       if (name) {
-        const fp = getWindowFingerprint(win);
-        updatedRegistry.push({
-          name: name,
-          count: fp ? fp.count : (win.tabs ? win.tabs.length : 1),
-          titles: fp ? fp.titles : [],
-          activeIndex: fp ? fp.activeIndex : 0,
-          signature: fp ? fp.signature : ''
-        });
+        const lower = name.trim().toLowerCase();
+        if (!updatedRegistryMap.has(lower)) {
+          const fp = getWindowFingerprint(win);
+          updatedRegistryMap.set(lower, {
+            name: name,
+            count: fp ? fp.count : (win.tabs ? win.tabs.length : 1),
+            titles: fp ? fp.titles : [],
+            activeIndex: fp ? fp.activeIndex : 0,
+            signature: fp ? fp.signature : ''
+          });
+        }
       }
     }
 
-    await api.storage.local.set({ savedWindowRegistry: updatedRegistry });
+    await api.storage.local.set({ savedWindowRegistry: Array.from(updatedRegistryMap.values()) });
   } catch (e) {}
 }
 
@@ -59,8 +105,8 @@ api.tabs.onCreated.addListener((tab) => { if (tab.windowId) syncWindowRegistry()
 api.tabs.onRemoved.addListener((tabId, removeInfo) => { if (removeInfo.windowId) syncWindowRegistry(); });
 api.tabs.onUpdated.addListener((tabId, changeInfo, tab) => { if (tab.windowId) syncWindowRegistry(); });
 
-// Best-match algorithm using Titles, Count, and macOS Z-Order Index
-function findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedNames) {
+// Best-match algorithm using Titles, Count, and macOS Z-Order Index with strict uniqueness
+function findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedNamesLower) {
   if (!win || !savedWindowRegistry || savedWindowRegistry.length === 0) return null;
 
   const fp = getWindowFingerprint(win);
@@ -70,7 +116,9 @@ function findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedName
   // Pass 1: Title & Tab Count Match
   for (let i = 0; i < savedWindowRegistry.length; i++) {
     const saved = savedWindowRegistry[i];
-    if (!saved || !saved.name || usedNames.has(saved.name)) continue;
+    if (!saved || !saved.name) continue;
+    const lowerName = saved.name.trim().toLowerCase();
+    if (usedNamesLower.has(lowerName)) continue;
 
     let score = 0;
 
@@ -106,18 +154,20 @@ function findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedName
   // Pass 2: Positional Z-Order Match (for identical or unloaded windows)
   if (!bestMatch && savedWindowRegistry[winIndex]) {
     const savedAtPos = savedWindowRegistry[winIndex];
-    if (savedAtPos && savedAtPos.name && !usedNames.has(savedAtPos.name)) {
-      bestMatch = savedAtPos.name;
+    if (savedAtPos && savedAtPos.name) {
+      const lowerName = savedAtPos.name.trim().toLowerCase();
+      if (!usedNamesLower.has(lowerName)) {
+        bestMatch = savedAtPos.name;
+      }
     }
   }
 
   return bestMatch;
 }
 
-// Window creation listener (Strict startup guard)
+// Window creation listener (Prompt & immediate list update)
 api.windows.onCreated.addListener(async (win) => {
   if (!win || win.id === api.windows.WINDOW_ID_NONE || win.type === 'popup') return;
-  if (isRestoringSession) return;
 
   try {
     const fullWin = await api.windows.get(win.id, { populate: true });
@@ -125,43 +175,66 @@ api.windows.onCreated.addListener(async (win) => {
     
     let name = windowNames[win.id];
 
-    if (!name) {
+    if (!name && isRestoringSession) {
       const allWins = await api.windows.getAll({ populate: true });
       const winIndex = allWins.findIndex(w => w.id === win.id);
-      const usedNames = new Set(Object.values(windowNames));
-      name = findBestMatchingCustomName(fullWin, winIndex, savedWindowRegistry, usedNames);
+      const usedNamesLower = new Set(Object.values(windowNames).map(n => (n || '').trim().toLowerCase()));
+      name = findBestMatchingCustomName(fullWin, winIndex, savedWindowRegistry, usedNamesLower);
     }
 
     if (name) {
       windowNames[win.id] = name;
       await api.storage.local.set({ windowNames });
       await updateWindowTooltip(win.id, name);
+    } else if (!isRestoringSession) {
+      // User opened a NEW window dynamically -> Prompt user to name window!
+      setTimeout(async () => {
+        try {
+          await api.windows.create({
+            url: api.runtime.getURL(`prompt/prompt.html?targetWindowId=${win.id}`),
+            type: 'popup',
+            width: 420,
+            height: 220
+          });
+        } catch (err) {}
+      }, 300);
     }
+
+    await updateAllWindowTooltips();
+    await syncWindowRegistry();
   } catch (e) {
     console.error('Error handling window onCreated:', e);
   }
 });
 
-// Update tooltips across all open windows
+// Update tooltips across all open windows with strict uniqueness
 async function updateAllWindowTooltips() {
   try {
+    await cleanAndDeduplicateStorage();
     const { windowNames = {}, savedWindowRegistry = [] } = await api.storage.local.get(['windowNames', 'savedWindowRegistry']);
     const windows = await api.windows.getAll({ populate: true });
     const validWindows = windows.filter(w => w.type !== 'popup');
-    const usedNames = new Set();
+    const usedNamesLower = new Set();
 
     for (let i = 0; i < validWindows.length; i++) {
       const win = validWindows[i];
       let name = windowNames[win.id];
 
       if (!name) {
-        name = findBestMatchingCustomName(win, i, savedWindowRegistry, usedNames);
+        name = findBestMatchingCustomName(win, i, savedWindowRegistry, usedNamesLower);
         if (name) {
           windowNames[win.id] = name;
-          usedNames.add(name);
+          usedNamesLower.add(name.trim().toLowerCase());
         }
       } else {
-        usedNames.add(name);
+        const lower = name.trim().toLowerCase();
+        if (usedNamesLower.has(lower)) {
+          // DUPLICATE DETECTED IN ACTIVE SESSION -> CLEAR DUPLICATE
+          delete windowNames[win.id];
+          name = null;
+        } else {
+          usedNamesLower.add(lower);
+        }
       }
 
       if (name) {
@@ -186,9 +259,9 @@ api.windows.onFocusChanged.addListener(async (windowId) => {
       if (win.type === 'popup') return;
       const allWins = await api.windows.getAll({ populate: true });
       const winIndex = allWins.findIndex(w => w.id === windowId);
-      const usedNames = new Set(Object.values(windowNames));
+      const usedNamesLower = new Set(Object.values(windowNames).map(n => (n || '').trim().toLowerCase()));
       
-      name = findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedNames);
+      name = findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedNamesLower);
       if (name) {
         windowNames[windowId] = name;
         await api.storage.local.set({ windowNames });
@@ -225,28 +298,39 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
     try {
       if (message.type === 'GET_WINDOWS') {
+        await cleanAndDeduplicateStorage();
         const windows = await api.windows.getAll({ populate: true });
         const { windowNames = {}, savedWindowRegistry = [] } = await api.storage.local.get(['windowNames', 'savedWindowRegistry']);
         const currentWin = await api.windows.getCurrent();
         const validWindows = windows.filter(win => win.type !== 'popup');
-        const usedNames = new Set();
+        const usedNamesLower = new Set();
         
         const result = validWindows.map((win, winIndex) => {
           let name = windowNames[win.id];
 
+          if (name) {
+            const lower = name.trim().toLowerCase();
+            if (usedNamesLower.has(lower)) {
+              // DUPLICATE IN STORAGE DETECTED -> CLEAR FROM THIS WINDOW
+              name = null;
+              delete windowNames[win.id];
+            }
+          }
+
           if (!name) {
-            name = findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedNames);
+            name = findBestMatchingCustomName(win, winIndex, savedWindowRegistry, usedNamesLower);
           }
 
           const activeTab = win.tabs ? win.tabs.find(t => t.active) || win.tabs[0] : null;
           const tabTitle = activeTab && activeTab.title ? activeTab.title : '';
 
-          if (!name) {
+          if (name) {
+            usedNamesLower.add(name.trim().toLowerCase());
+            windowNames[win.id] = name;
+          } else {
+            // Clean fallback: Use active tab title or Window #ID (NOT saved into custom windowNames)
             name = tabTitle ? tabTitle : `Window #${win.id}`;
           }
-
-          usedNames.add(name);
-          windowNames[win.id] = name;
 
           return {
             id: win.id,
@@ -290,7 +374,11 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
         
         const { windowNames: updatedNames = {} } = await api.storage.local.get('windowNames');
-        updatedNames[windowId] = sanitizedName;
+        if (sanitizedName) {
+          updatedNames[windowId] = sanitizedName;
+        } else {
+          delete updatedNames[windowId];
+        }
         await api.storage.local.set({ windowNames: updatedNames });
         
         await syncWindowRegistry();
