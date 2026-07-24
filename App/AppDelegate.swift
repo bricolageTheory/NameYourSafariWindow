@@ -5,7 +5,7 @@ import SafariServices
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: "com.coolnick.SafariWindowSwitcher.Extension") { error in
+        SFSafariApplication.showPreferencesForExtension(withIdentifier: "com.coolnick.NameYourSafariWindow.Extension") { error in
             if let error = error {
                 print("Error opening preferences: \(error.localizedDescription)")
             }

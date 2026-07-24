@@ -3,8 +3,8 @@ set -e
 
 export DEVELOPER_DIR="/Library/Developer/CommandLineTools"
 
-APP_NAME="Safari Window Switcher"
-BUNDLE_ID="com.coolnick.SafariWindowSwitcher"
+APP_NAME="Name Your Safari Window"
+BUNDLE_ID="com.coolnick.NameYourSafariWindow"
 EXTENSION_BUNDLE_ID="${BUNDLE_ID}.Extension"
 BUILD_DIR="$(pwd)/build"
 APP_BUNDLE="/Applications/${APP_NAME}.app"

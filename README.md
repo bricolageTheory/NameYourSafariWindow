@@ -1,4 +1,4 @@
-# 🧭 Safari Window Switcher (v0.3.0)
+# 🧭 Name Your Safari Window (v0.3.0)
 
 > **Apple wouldn't do this so I tried vibe-coding. Assign custom names to Safari windows, filter open windows instantly, and switch focus effortlessly.**
 
@@ -37,10 +37,10 @@ This extension is 100% open source. You can build and install it locally on your
 1. Clone or download this repository.
 2. Open Terminal in the project folder and run:
    ```bash
-   ./build_production.sh
+   ./package_direct_download.sh --notarize
    ```
 3. Open **Safari > Settings > Developer 🛠️** tab and check **"Allow Unsigned Extensions"**.
-4. Switch to the **Extensions** tab—**Safari Window Switcher** is ready to use!
+4. Switch to the **Extensions** tab—**Name Your Safari Window** is ready to use!
 
 ### Option B: Build in Xcode (Permanent Sign)
 

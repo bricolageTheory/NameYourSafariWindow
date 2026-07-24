@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e
 
-APP_NAME="Safari Window Switcher"
+APP_NAME="Name Your Safari Window"
 VERSION="0.3.0"
-BUNDLE_ID="com.coolnick.SafariWindowSwitcher"
+BUNDLE_ID="com.coolnick.NameYourSafariWindow"
 EXTENSION_BUNDLE_ID="${BUNDLE_ID}.Extension"
 BUILD_DIR="$(pwd)/build/dist"
 DIST_DIR="$(pwd)/dist"
 APP_BUNDLE="${BUILD_DIR}/${APP_NAME}.app"
 PLUGINS_DIR="${APP_BUNDLE}/Contents/PlugIns"
 EXTENSION_BUNDLE="${PLUGINS_DIR}/${APP_NAME} Extension.appex"
-DMG_NAME="${DIST_DIR}/SafariWindowSwitcher-v${VERSION}.dmg"
-ZIP_NAME="${DIST_DIR}/SafariWindowSwitcher-v${VERSION}.zip"
+DMG_NAME="${DIST_DIR}/NameYourSafariWindow-v${VERSION}.dmg"
+ZIP_NAME="${DIST_DIR}/NameYourSafariWindow-v${VERSION}.zip"
 
 echo "========================================================"
 echo "Packaging Direct Web Download Bundle for ${APP_NAME} v${VERSION}..."
@@ -134,8 +134,34 @@ zip -r "${ZIP_NAME}" "${APP_NAME}.app" > /dev/null
 hdiutil create -volname "${APP_NAME}" -srcfolder "${APP_BUNDLE}" -ov -format UDZO "${DMG_NAME}" > /dev/null
 cd - > /dev/null
 
+if [ "${SIGNING_IDENTITY}" != "-" ]; then
+    echo "Signing DMG Disk Image with Developer ID Application Certificate..."
+    codesign --sign "${SIGNING_IDENTITY}" "${DMG_NAME}"
+fi
+
+# 8. Notarization & Stapling (if --notarize argument passed or requested)
+if [[ "$*" == *"--notarize"* ]]; then
+    echo "========================================================"
+    echo "Submitting ${DMG_NAME} to Apple Notary Service..."
+    echo "========================================================"
+    NOTARY_OUTPUT=$(xcrun notarytool submit "${DMG_NAME}" --keychain-profile "AC_NOTARY" --wait 2>&1)
+    echo "${NOTARY_OUTPUT}"
+
+    if echo "${NOTARY_OUTPUT}" | grep -q "status: Accepted"; then
+        echo "Notarization Accepted! Waiting 20 seconds for Apple CloudKit CDN propagation..."
+        sleep 20
+        echo "Stapling notarization ticket to ${DMG_NAME}..."
+        xcrun stapler staple "${DMG_NAME}"
+        echo "Stapling successfully verified!"
+    else
+        echo "Error: Apple Notary Service submission was not accepted."
+        exit 1
+    fi
+fi
+
 echo "========================================================"
 echo "Direct Download Packages Successfully Created:"
 echo "  1. ZIP Archive: ${ZIP_NAME}"
 echo "  2. DMG Installer: ${DMG_NAME}"
 echo "========================================================"
+
