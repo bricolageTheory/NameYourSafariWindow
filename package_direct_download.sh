@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e
 
-APP_NAME="Name Your Safari Window"
+APP_NAME="nameYourSafariWindows"
 VERSION="0.3.0"
-BUNDLE_ID="com.coolnick.NameYourSafariWindow"
+BUNDLE_ID="com.coolnick.nameYourSafariWindows"
 EXTENSION_BUNDLE_ID="${BUNDLE_ID}.Extension"
 BUILD_DIR="$(pwd)/build/dist"
 DIST_DIR="$(pwd)/dist"
 APP_BUNDLE="${BUILD_DIR}/${APP_NAME}.app"
 PLUGINS_DIR="${APP_BUNDLE}/Contents/PlugIns"
 EXTENSION_BUNDLE="${PLUGINS_DIR}/${APP_NAME} Extension.appex"
-DMG_NAME="${DIST_DIR}/NameYourSafariWindow-v${VERSION}.dmg"
-ZIP_NAME="${DIST_DIR}/NameYourSafariWindow-v${VERSION}.zip"
+DMG_NAME="${DIST_DIR}/nameYourSafariWindows-v${VERSION}.dmg"
+ZIP_NAME="${DIST_DIR}/nameYourSafariWindows-v${VERSION}.zip"
 
 echo "========================================================"
 echo "Packaging Direct Web Download Bundle for ${APP_NAME} v${VERSION}..."

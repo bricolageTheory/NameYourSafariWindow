@@ -1,4 +1,4 @@
-# 🧭 Name Your Safari Window (v0.3.0)
+# 🧭 nameYourSafariWindows (v0.3.0)
 
 > **Apple wouldn't do this so I tried vibe-coding. Assign custom names to Safari windows, filter open windows instantly, and switch focus effortlessly.**
 
