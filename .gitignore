@@ -21,3 +21,7 @@ xcuserdata/
 # Temporary / Scratch Files
 *.tmp
 *.log
+
+# AI Agent Configs & Rules
+.agents/
+
